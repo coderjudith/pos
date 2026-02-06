@@ -7,6 +7,13 @@ require_role('admin');
 $start_date = $_GET['start_date'] ?? date('Y-m-d');
 $end_date = $_GET['end_date'] ?? date('Y-m-d');
 
+// Validate dates
+if ($start_date > $end_date) {
+    $temp = $start_date;
+    $start_date = $end_date;
+    $end_date = $temp;
+}
+
 // Get sales report
 $stmt = $pdo->prepare("
     SELECT DATE(sale_date) as sale_day, 
@@ -79,6 +86,9 @@ $summary = $stmt->fetch();
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
         .logo {
@@ -97,6 +107,7 @@ $summary = $stmt->fetch();
             border-radius: 5px;
             text-decoration: none;
             font-size: 14px;
+            transition: all 0.3s ease;
         }
         
         .nav-btn.primary {
@@ -109,6 +120,11 @@ $summary = $stmt->fetch();
             color: white;
         }
         
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
         .container {
             max-width: 1400px;
             margin: 30px auto;
@@ -119,14 +135,28 @@ $summary = $stmt->fetch();
             font-size: 28px;
             color: #333;
             margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .page-title::before {
+            content: "📊";
+            font-size: 24px;
         }
         
         .card {
             background: white;
             border-radius: 10px;
             padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
             margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.12);
         }
         
         .card-title {
@@ -136,6 +166,14 @@ $summary = $stmt->fetch();
             color: #333;
             padding-bottom: 10px;
             border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title::before {
+            content: "📈";
+            font-size: 18px;
         }
         
         .filter-form {
@@ -143,10 +181,11 @@ $summary = $stmt->fetch();
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 20px;
+            align-items: end;
         }
         
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 0;
         }
         
         label {
@@ -163,16 +202,26 @@ $summary = $stmt->fetch();
             border: 2px solid #e0e0e0;
             border-radius: 5px;
             font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #667eea;
         }
         
         .btn {
-            padding: 10px 25px;
+            padding: 12px 25px;
             border: none;
             border-radius: 5px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            align-self: end;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .btn-primary {
@@ -180,11 +229,17 @@ $summary = $stmt->fetch();
             color: white;
         }
         
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
         .summary-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
         
         .summary-card {
@@ -192,7 +247,14 @@ $summary = $stmt->fetch();
             border-radius: 10px;
             padding: 25px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border-top: 4px solid #667eea;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.12);
         }
         
         .summary-card .value {
@@ -200,49 +262,75 @@ $summary = $stmt->fetch();
             font-weight: bold;
             color: #667eea;
             margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
         }
         
         .summary-card .label {
             color: #666;
             font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .table-container {
             overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
         }
         
         .report-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            min-width: 800px;
         }
         
         .report-table th {
             background: #f8fafc;
             text-align: left;
-            padding: 15px;
+            padding: 16px 20px;
             font-weight: 600;
             color: #374151;
             border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         
         .report-table td {
-            padding: 15px;
+            padding: 16px 20px;
             border-bottom: 1px solid #e5e7eb;
             vertical-align: middle;
+            font-size: 14px;
+        }
+        
+        .report-table tr:last-child td {
+            border-bottom: none;
         }
         
         .report-table tr:hover {
             background: #f9fafb;
         }
         
-        .text-right {
-            text-align: right;
+        .report-table tr:nth-child(even) {
+            background: #fcfcfc;
         }
+        
+        .report-table tr:nth-child(even):hover {
+            background: #f9fafb;
+        }
+        
+       .text-right {
+    text-align: left;
+    font-family: inherit;
+    font-weight: 500;
+}
         
         .text-center {
             text-align: center;
-        }
+            color: #6b7280;
+            font-style: italic;
+        } 
         
         .positive {
             color: #10b981;
@@ -256,10 +344,119 @@ $summary = $stmt->fetch();
             display: inline-block;
             background: #e0e7ff;
             color: #4f46e5;
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
-            margin-right: 5px;
+            font-family: monospace;
+            font-weight: 500;
+        }
+        
+        .date-column {
+            min-width: 120px;
+            white-space: nowrap;
+        }
+        
+        .number-column {
+            min-width: 100px;
+        }
+        
+        .rank-column {
+            width: 60px;
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .product-column {
+            min-width: 200px;
+        }
+        
+        .barcode-column {
+            min-width: 150px;
+        }
+        
+        .no-data {
+            padding: 40px !important;
+            text-align: center;
+            color: #9ca3af;
+        }
+        
+        .no-data::before {
+            content: "📭";
+            font-size: 24px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        /*additional*/
+        /* ===== EXPORT BUTTONS STYLES ===== */
+.export-buttons {
+    display: flex;
+    gap: 12px;
+    margin-left: 20px;
+}
+
+.export-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #6b7280;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.export-btn.csv {
+    background: #3b82f6; /* Green for CSV */
+}
+
+.export-btn.pdf {
+    background: #f97316; /* Red for PDF */
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0.9;
+}
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 0 15px;
+                margin: 20px auto;
+            }
+            
+            .page-title {
+                font-size: 24px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .summary-card .value {
+                font-size: 28px;
+            }
         }
     </style>
 </head>
@@ -299,7 +496,9 @@ $summary = $stmt->fetch();
                 </div>
                 
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span>📊</span> Generate Report
+                    </button>
                 </div>
             </form>
         </div>
@@ -317,82 +516,130 @@ $summary = $stmt->fetch();
             </div>
             
             <div class="summary-card">
-                <div class="value">₱<?php echo number_format($summary['avg_transaction'] ?? 0, 2); ?></div>
+                <div class="value"><?php echo CURRENCY_SYMBOL . number_format($summary['avg_transaction'] ?? 0, 2); ?></div>
                 <div class="label">Average Transaction</div>
             </div>
             
             <div class="summary-card">
-                <div class="value">₱<?php echo number_format($summary['total_cash'] ?? 0, 2); ?></div>
+                <div class="value"><?php echo CURRENCY_SYMBOL . number_format($summary['total_cash'] ?? 0, 2); ?></div>
                 <div class="label">Total Cash Received</div>
             </div>
         </div>
         
         <!-- Daily Sales Report -->
         <div class="card">
-            <h2 class="card-title">Daily Sales Report</h2>
+            <div class="table-header">
+    <h2 class="card-title">Daily Sales Report</h2>
+    <div class="export-buttons">
+        <a href="export.php?type=csv&report=daily&start_date=<?php echo $start_date; ?>&end_date=<?php echo $end_date; ?>" class="export-btn csv">
+            <span>📊</span> CSV
+        </a>
+        <a href="export.php?type=pdf&report=daily&start_date=<?php echo $start_date; ?>&end_date=<?php echo $end_date; ?>" class="export-btn pdf">
+            <span>📄</span> PDF
+        </a>
+    </div>
+</div>
             
             <div class="table-container">
-                <table class="report-table">
+                <table class="report-table" id="daily-sales">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th class="text-right">Transactions</th>
-                            <th class="text-right">Total Sales</th>
-                            <th class="text-right">Cash Received</th>
-                            <th class="text-right">Change Given</th>
+                            <th class="date-column">Date</th>
+                            <th class="text-right number-column">Transactions</th>
+                            <th class="text-right number-column">Total Sales</th>
+                            <th class="text-right number-column">Cash Received</th>
+                            <th class="text-right number-column">Change Given</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($daily_report)): ?>
                             <tr>
-                                <td colspan="5" class="text-center">No sales data for selected period</td>
+                                <td colspan="5" class="no-data">No sales data for selected period</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($daily_report as $row): ?>
                                 <tr>
-                                    <td><?php echo date('d M Y', strtotime($row['sale_day'])); ?></td>
-                                    <td class="text-right"><?php echo $row['transactions']; ?></td>
-                                    <td class="text-right"><?php echo CURRENCY_SYMBOL . number_format($row['total_sales'], 2); ?></td>
-                                    <td class="text-right">₱<?php echo number_format($row['total_cash'], 2); ?></td>
-                                    <td class="text-right">₱<?php echo number_format($row['total_change'], 2); ?></td>
+                                    <td class="date-column">
+                                        <strong><?php echo date('d M Y', strtotime($row['sale_day'])); ?></strong>
+                                        <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">
+                                            <?php echo date('D', strtotime($row['sale_day'])); ?>
+                                        </div>
+                                    </td>
+                                    <td class="text-right"><?php echo number_format($row['transactions']); ?></td>
+                                    <td class="text-right positive">
+    <strong><?php echo CURRENCY_SYMBOL . number_format($row['total_sales'], 2); ?></strong>
+</td>
+<td class="text-right"><?php echo CURRENCY_SYMBOL . number_format($row['total_cash'], 2); ?></td>
+<td class="text-right"><?php echo CURRENCY_SYMBOL . number_format($row['total_change'], 2); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
+                    <?php if (!empty($daily_report)): ?>
+                    <tfoot>
+                        <tr style="background: #f8fafc; font-weight: bold;">
+                            <td>TOTAL</td>
+<td class="text-right"><?php echo number_format(array_sum(array_column($daily_report, 'transactions'))); ?></td>
+<td class="text-right positive"><?php echo CURRENCY_SYMBOL . number_format(array_sum(array_column($daily_report, 'total_sales')), 2); ?></td>
+<td class="text-right"><?php echo CURRENCY_SYMBOL . number_format(array_sum(array_column($daily_report, 'total_cash')), 2); ?></td>
+<td class="text-right"><?php echo CURRENCY_SYMBOL . number_format(array_sum(array_column($daily_report, 'total_change')), 2); ?></td>
+                        </tr>
+                    </tfoot>
+                    <?php endif; ?>
                 </table>
             </div>
         </div>
         
         <!-- Best Selling Products -->
         <div class="card">
-            <h2 class="card-title">Best Selling Products</h2>
+            <div class="table-header">
+    <h2 class="card-title">Best Selling Products</h2>
+    <div class="export-buttons">
+        <a href="export.php?type=csv&report=products&start_date=<?php echo $start_date; ?>&end_date=<?php echo $end_date; ?>" class="export-btn csv">
+            <span>📊</span> CSV
+        </a>
+        <a href="export.php?type=pdf&report=products&start_date=<?php echo $start_date; ?>&end_date=<?php echo $end_date; ?>" class="export-btn pdf">
+            <span>📄</span> PDF
+        </a>
+    </div>
+</div>
             
             <div class="table-container">
-                <table class="report-table">
+                <table class="report-table" id="best-sellers">
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Product</th>
-                            <th>Barcode</th>
-                            <th class="text-right">Quantity Sold</th>
-                            <th class="text-right">Total Amount</th>
+                            <th class="rank-column">#</th>
+                            <th class="product-column">Product</th>
+                            <th class="barcode-column">Barcode</th>
+                            <th class="text-right number-column">Quantity Sold</th>
+                            <th class="text-right number-column">Total Amount</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($best_sellers)): ?>
                             <tr>
-                                <td colspan="5" class="text-center">No sales data for selected period</td>
+                                <td colspan="5" class="no-data">No sales data for selected period</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($best_sellers as $index => $product): ?>
                                 <tr>
-                                    <td><?php echo $index + 1; ?></td>
-                                    <td><?php echo htmlspecialchars($product['name']); ?></td>
+                                    <td class="rank-column">
+                                        <div style="background: #e0e7ff; color: #667eea; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto;">
+                                            <?php echo $index + 1; ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong><?php echo htmlspecialchars($product['name']); ?></strong>
+                                    </td>
                                     <td>
                                         <span class="product-badge"><?php echo $product['barcode']; ?></span>
                                     </td>
-                                    <td class="text-right"><?php echo $product['total_qty']; ?></td>
-                                    <td class="text-right"><?php echo CURRENCY_SYMBOL . number_format($product['total_amount'], 2); ?></td>
+                                    <td class="text-right">
+                                        <span style="background: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 15px; font-weight: 500;">
+                                            <?php echo number_format($product['total_qty']); ?> units
+                                        </span>
+                                    </td>
+                                    <td class="text-right positive"><strong><?php echo CURRENCY_SYMBOL . number_format($product['total_amount'], 2); ?></strong></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -401,5 +648,36 @@ $summary = $stmt->fetch();
             </div>
         </div>
     </div>
+
+    <script>
+        // Simple export functionality (would need server-side implementation for full functionality)
+        function exportTable(tableId) {
+            alert('Export functionality would be implemented here for the ' + tableId + ' table.');
+            // In a real implementation, this would trigger a server-side PDF/Excel export
+        }
+
+        // Set max date to today for end_date
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const endDateInput = document.getElementById('end_date');
+            const startDateInput = document.getElementById('start_date');
+            
+            endDateInput.max = today;
+            startDateInput.max = today;
+            
+            // Prevent selecting end date before start date
+            startDateInput.addEventListener('change', function() {
+                endDateInput.min = this.value;
+                if (endDateInput.value && endDateInput.value < this.value) {
+                    endDateInput.value = this.value;
+                }
+            });
+            
+            // Initialize min date on page load
+            if (startDateInput.value) {
+                endDateInput.min = startDateInput.value;
+            }
+        });
+    </script>
 </body>
 </html>

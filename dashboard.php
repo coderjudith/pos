@@ -166,8 +166,9 @@ require_login();
                 
                 <!-- Today's Stats Card -->
                 <div class="card" style="background: #f0f9ff; border-left: 4px solid #0ea5e9;">
-                    <div class="card-icon">📈</div>
-                    <div class="card-title">Today's Performance</div>
+    <div class="card-icon">📊</div>
+    <div class="card-title">Today's Sales</div>
+    <p>View your sales performance</p>
                     
                     <?php
                     // Get today's sales stats for this cashier

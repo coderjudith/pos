@@ -371,7 +371,7 @@ foreach ($products as $product) {
             <span>Subtotal:</span>
             <span id="subtotal"><?php echo CURRENCY_SYMBOL; ?>0.00</span>
         </div>
-        <<div class="total-row">
+        <div class="total-row">
     <span>VAT (12%):</span>
     <span id="tax"><?php echo CURRENCY_SYMBOL; ?>0.00</span>
 </div>
