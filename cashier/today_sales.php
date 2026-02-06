@@ -37,7 +37,7 @@ foreach ($sales as $sale) {
     
     <div style="display: flex; gap: 20px; margin: 20px 0;">
         <div style="background: #d1fae5; padding: 15px; border-radius: 8px;">
-            <div style="font-size: 24px; font-weight: bold;">₹<?php echo number_format($total_sales, 2); ?></div>
+            <div style="font-size: 24px; font-weight: bold;">₱<?php echo number_format($total_sales, 2); ?></div>
             <div>Total Sales</div>
         </div>
         <div style="background: #dbeafe; padding: 15px; border-radius: 8px;">
@@ -62,9 +62,9 @@ foreach ($sales as $sale) {
             <tr>
                 <td><?php echo str_pad($sale['id'], 6, '0', STR_PAD_LEFT); ?></td>
                 <td><?php echo date('H:i:s', strtotime($sale['sale_date'])); ?></td>
-                <td>₹<?php echo number_format($sale['total_amount'], 2); ?></td>
-                <td>₹<?php echo number_format($sale['cash'], 2); ?></td>
-                <td>₹<?php echo number_format($sale['change_amount'], 2); ?></td>
+                <td>₱<?php echo number_format($sale['total_amount'], 2); ?></td>
+                <td>₱<?php echo number_format($sale['cash'], 2); ?></td>
+                <td>₱<?php echo number_format($sale['change_amount'], 2); ?></td>
                 <td><a href="../actions/receipt.php?sale_id=<?php echo $sale['id']; ?>" target="_blank">View Receipt</a></td>
             </tr>
             <?php endforeach; ?>

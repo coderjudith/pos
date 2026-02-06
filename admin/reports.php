@@ -317,12 +317,12 @@ $summary = $stmt->fetch();
             </div>
             
             <div class="summary-card">
-                <div class="value">₹<?php echo number_format($summary['avg_transaction'] ?? 0, 2); ?></div>
+                <div class="value">₱<?php echo number_format($summary['avg_transaction'] ?? 0, 2); ?></div>
                 <div class="label">Average Transaction</div>
             </div>
             
             <div class="summary-card">
-                <div class="value">₹<?php echo number_format($summary['total_cash'] ?? 0, 2); ?></div>
+                <div class="value">₱<?php echo number_format($summary['total_cash'] ?? 0, 2); ?></div>
                 <div class="label">Total Cash Received</div>
             </div>
         </div>
@@ -353,8 +353,8 @@ $summary = $stmt->fetch();
                                     <td><?php echo date('d M Y', strtotime($row['sale_day'])); ?></td>
                                     <td class="text-right"><?php echo $row['transactions']; ?></td>
                                     <td class="text-right"><?php echo CURRENCY_SYMBOL . number_format($row['total_sales'], 2); ?></td>
-                                    <td class="text-right">₹<?php echo number_format($row['total_cash'], 2); ?></td>
-                                    <td class="text-right">₹<?php echo number_format($row['total_change'], 2); ?></td>
+                                    <td class="text-right">₱<?php echo number_format($row['total_cash'], 2); ?></td>
+                                    <td class="text-right">₱<?php echo number_format($row['total_change'], 2); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>

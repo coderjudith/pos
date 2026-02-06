@@ -235,7 +235,7 @@ $items = $stmt->fetchAll();
             </div>
             <div class="total-row">
                 <span>Tax:</span>
-                <span>₱0.00</span>
+                <span><?php echo CURRENCY_SYMBOL; ?>0.00</span>
             </div>
             <div class="total-row">
                 <span>Cash:</span>

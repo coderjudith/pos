@@ -54,7 +54,18 @@ foreach ($_SESSION['cart'] as $item) {
     if (isset($item['subtotal'])) {
         $total += floatval($item['subtotal']);
     }
+if (VAT_ENABLED) {
+    $vat_rate = VAT_RATE;
+    $subtotal = $total;  // Amount before tax
+    $vat_amount = $subtotal * $vat_rate;
+    $grand_total = $subtotal + $vat_amount;
+} else {
+    $subtotal = $total;
+    $vat_amount = 0;
+    $grand_total = $total;
 }
+
+    }
 
 // Validate cash
 if ($cash < $total) {
@@ -70,16 +81,18 @@ try {
     
     // 1. Insert sale record
     $stmt = $pdo->prepare("
-        INSERT INTO sales (cashier_id, total_amount, cash, change_amount, sale_date) 
-        VALUES (?, ?, ?, ?, NOW())
-    ");
-    
-    $stmt->execute([
-        $_SESSION['user_id'],
-        $total,
-        $cash,
-        $change
-    ]);
+    INSERT INTO sales (cashier_id, subtotal, vat_amount, total_amount, cash, change_amount) 
+    VALUES (?, ?, ?, ?, ?, ?)
+");
+
+$stmt->execute([
+    $_SESSION['user_id'],
+    $subtotal,
+    $vat_amount,
+    $grand_total,  // This is now total with VAT
+    $cash,
+    $change
+]);
     
     $sale_id = $pdo->lastInsertId();
     

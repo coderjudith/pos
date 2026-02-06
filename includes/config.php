@@ -20,9 +20,10 @@ define('RECEIPT_WIDTH', '80mm');
 define('RECEIPT_HEADER', 'SALAMAT PO! COME AGAIN!');
 define('RECEIPT_FOOTER', 'Please present receipt for returns within 7 days');
 
-// Tax Configuration (Philippines VAT)
-define('TAX_RATE', 0.12);  // 12% VAT
-define('TAX_NAME', 'VAT');
+// VAT Configuration for Philippines (12%)
+define('VAT_RATE', 0.12);        // 12% VAT
+define('VAT_NAME', 'VAT');       // Tax display name
+define('VAT_ENABLED', true);     // Set to false to disable VAT
 
 // Business Hours
 define('OPEN_TIME', '8:00 AM');

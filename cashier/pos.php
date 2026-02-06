@@ -371,10 +371,10 @@ foreach ($products as $product) {
             <span>Subtotal:</span>
             <span id="subtotal"><?php echo CURRENCY_SYMBOL; ?>0.00</span>
         </div>
-        <div class="total-row">
-            <span>Tax (0%):</span>
-            <span id="tax"><?php echo CURRENCY_SYMBOL; ?>0.00</span>
-        </div>
+        <<div class="total-row">
+    <span>VAT (12%):</span>
+    <span id="tax"><?php echo CURRENCY_SYMBOL; ?>0.00</span>
+</div>
         <div class="total-row grand-total">
             <span>Total:</span>
             <span id="total"><?php echo CURRENCY_SYMBOL; ?>0.00</span>
@@ -455,22 +455,28 @@ foreach ($products as $product) {
     }
     
     function calculateTotals(cart) {
-        let subtotal = 0;
-        for (const barcode in cart) {
-            subtotal += parseFloat(cart[barcode].subtotal);
-        }
-        
-        const tax = 0;
-        const total = subtotal + tax;
-        
-        document.getElementById('subtotal').textContent = '<?php echo CURRENCY_SYMBOL; ?>' + subtotal.toFixed(2);
-        document.getElementById('tax').textContent = '<?php echo CURRENCY_SYMBOL; ?>' + tax.toFixed(2);
-        document.getElementById('total').textContent = '<?php echo CURRENCY_SYMBOL; ?>' + total.toFixed(2);
-        
-        calculateChange(total);
-        
-        return total;
+    let subtotal = 0;
+    for (const barcode in cart) {
+        subtotal += parseFloat(cart[barcode].subtotal);
     }
+    
+    // Calculate VAT (12% for Philippines) - CHANGE THIS
+    const vatRate = 0.12;
+    const vat = subtotal * vatRate;
+    const total = subtotal + vat;
+    
+    document.getElementById('subtotal').textContent = '<?php echo CURRENCY_SYMBOL; ?>' + subtotal.toFixed(2);
+    document.getElementById('tax').textContent = '<?php echo CURRENCY_SYMBOL; ?>' + vat.toFixed(2);
+    document.getElementById('total').textContent = '<?php echo CURRENCY_SYMBOL; ?>' + total.toFixed(2);
+    
+    calculateChange(total);
+    
+    return {
+        subtotal: subtotal,
+        vat: vat,
+        total: total
+    };
+}
     
     function calculateChange(total) {
         const cashInput = document.getElementById('cashInput');
@@ -547,84 +553,124 @@ foreach ($products as $product) {
     }
     
     function checkout() {
-        const cash = parseFloat(document.getElementById('cashInput').value) || 0;
-        const total = parseFloat(document.getElementById('total').textContent.replace('<?php echo CURRENCY_SYMBOL; ?>', '')) || 0;
-        const checkoutBtn = document.getElementById('checkoutBtn');
+    const cash = parseFloat(document.getElementById('cashInput').value) || 0;
+    
+    // Get subtotal (before VAT) - change this line
+    const subtotal = parseFloat(document.getElementById('subtotal').textContent.replace('<?php echo CURRENCY_SYMBOL; ?>', '')) || 0;
+    
+    // Calculate VAT (12% for Philippines) - add these lines
+    const vatRate = 0.12;
+    const vatAmount = subtotal * vatRate;
+    
+    // Calculate total (subtotal + VAT) - change this line
+    const total = subtotal + vatAmount;
+    
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    
+    if (total === 0) {
+        alert('Cart is empty! Add items first.');
+        return;
+    }
+    
+    if (cash < total) {
+        alert('Cash amount (<?php echo CURRENCY_SYMBOL; ?>' + cash.toFixed(2) + ') is less than total amount (<?php echo CURRENCY_SYMBOL; ?>' + total.toFixed(2) + ').');
+        document.getElementById('cashInput').focus();
+        return;
+    }
+    
+    const change = cash - total;
+    
+    // Update confirm message to show VAT breakdown
+    if (confirm(`CONFIRM CHECKOUT?\n\nSubtotal: <?php echo CURRENCY_SYMBOL; ?>${subtotal.toFixed(2)}\nVAT (12%): <?php echo CURRENCY_SYMBOL; ?>${vatAmount.toFixed(2)}\nTotal: <?php echo CURRENCY_SYMBOL; ?>${total.toFixed(2)}\nCash: <?php echo CURRENCY_SYMBOL; ?>${cash.toFixed(2)}\nChange: <?php echo CURRENCY_SYMBOL; ?>${change.toFixed(2)}`)) {
+        // Show loading state
+        checkoutBtn.disabled = true;
+        checkoutBtn.innerHTML = '⏳ PROCESSING...';
         
-        if (total === 0) {
-            alert('Cart is empty! Add items first.');
-            return;
-        }
+        console.log('Sending checkout with:', { 
+            cash: cash, 
+            subtotal: subtotal, 
+            vat: vatAmount, 
+            total: total 
+        });
         
-        if (cash < total) {
-            alert('Cash amount is less than total amount. Please enter sufficient cash.');
-            document.getElementById('cashInput').focus();
-            return;
-        }
-        
-        const change = cash - total;
-        if (confirm(`CONFIRM CHECKOUT?\n\nTotal: <?php echo CURRENCY_SYMBOL; ?>${total.toFixed(2)}\nCash: <?php echo CURRENCY_SYMBOL; ?>${cash.toFixed(2)}\nChange: <?php echo CURRENCY_SYMBOL; ?>${change.toFixed(2)}`)) {
-            // Show loading state
-            checkoutBtn.disabled = true;
-            checkoutBtn.innerHTML = '⏳ PROCESSING...';
+        // Send ALL values to server
+        fetch('../actions/checkout.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                cash: cash,
+                subtotal: subtotal,
+                vat: vatAmount,
+                total: total
+            })
+        })
+        .then(response => {
+            console.log('Response status:', response.status, response.statusText);
             
-            fetch('../actions/checkout.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ cash: cash })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+            // First, get the response as TEXT to see what's coming back
+            return response.text().then(text => {
+                console.log('Raw response:', text);
+                
+                // Try to parse as JSON
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', e);
+                    console.error('Response was:', text);
+                    
+                    // Show the raw response in alert
+                    throw new Error('Server returned invalid JSON. Raw response:\n' + text.substring(0, 500));
                 }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // SUCCESS
-                    alert(`✅ SALE COMPLETED!\n\nReceipt #: ${data.sale_id}\nTotal: <?php echo CURRENCY_SYMBOL; ?>${total.toFixed(2)}`);
-                    
-                    // Show NEW SALE button
-                    document.getElementById('newSaleBtn').style.display = 'block';
-                    
-                    // Ask if user wants to view receipt
-                    if (confirm('View receipt in new tab?')) {
-                        window.open('../actions/receipt.php?sale_id=' + data.sale_id, '_blank');
-                    }
-                    
-                    // Clear cart display (but keep button visible)
-                    loadCart();
-                    
-                    // Reset form
-                    document.getElementById('cashInput').value = '';
-                    document.getElementById('changeDisplay').textContent = 'Change: <?php echo CURRENCY_SYMBOL; ?>0.00';
-                    document.getElementById('changeDisplay').style.color = '#10b981';
-                    
-                    // Reset checkout button
-                    checkoutBtn.disabled = false;
-                    checkoutBtn.innerHTML = 'PROCESS CHECKOUT';
-                    
-                    // Focus back on barcode input
-                    document.getElementById('barcodeInput').focus();
-                    
-                } else {
-                    // ERROR from server
-                    alert('❌ Checkout failed: ' + data.message);
-                    checkoutBtn.disabled = false;
-                    checkoutBtn.innerHTML = 'PROCESS CHECKOUT';
+            });
+        })
+        .then(data => {
+            console.log('Parsed data:', data);
+            
+            if (data.success) {
+                // SUCCESS
+                alert(`✅ ${data.message || 'SALE COMPLETED!'}\n\nReceipt #: ${data.sale_id}\nTotal: <?php echo CURRENCY_SYMBOL; ?>${total.toFixed(2)}`);
+                
+                // Show NEW SALE button
+                document.getElementById('newSaleBtn').style.display = 'block';
+                
+                // Ask if user wants to view receipt
+                if (confirm('View receipt in new tab?')) {
+                    window.open('../actions/receipt.php?sale_id=' + data.sale_id, '_blank');
                 }
-            })
-            .catch(error => {
-                // NETWORK ERROR
-                console.error('Checkout error:', error);
-                alert('❌ Network error. Please check:\n1. Internet connection\n2. Server is running\n3. Check browser console (F12) for details');
+                
+                // Clear cart display (but keep button visible)
+                loadCart();
+                
+                // Reset form
+                document.getElementById('cashInput').value = '';
+                document.getElementById('changeDisplay').textContent = 'Change: <?php echo CURRENCY_SYMBOL; ?>0.00';
+                document.getElementById('changeDisplay').style.color = '#10b981';
+                
+                // Reset checkout button
                 checkoutBtn.disabled = false;
                 checkoutBtn.innerHTML = 'PROCESS CHECKOUT';
-            });
-        }
+                
+                // Focus back on barcode input
+                document.getElementById('barcodeInput').focus();
+                
+            } else {
+                // ERROR from server
+                alert('❌ Checkout failed: ' + data.message);
+                checkoutBtn.disabled = false;
+                checkoutBtn.innerHTML = 'PROCESS CHECKOUT';
+            }
+        })
+        .catch(error => {
+            // NETWORK ERROR or JSON parse error
+            console.error('Checkout error:', error);
+            alert('❌ Error: ' + error.message + '\n\nOpen browser console (F12) for details.');
+            checkoutBtn.disabled = false;
+            checkoutBtn.innerHTML = 'PROCESS CHECKOUT';
+        });
     }
+}
     
     function newSale() {
         const newSaleBtn = document.getElementById('newSaleBtn');
