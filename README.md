@@ -2,10 +2,10 @@
 
 A complete, beginner-friendly Point of Sale system built with plain PHP, MySQL, and JavaScript. Designed for small to medium retail stores in the Philippines.
 
-[https://img.shields.io/badge/PHP-8.0+-777BB4?style=for-the-badge&logo=php&logoColor=white](https://img.shields.io/badge/PHP-8.0+-777BB4?style=for-the-badge&logo=php&logoColor=white)  
-[https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)  
-[https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)  
-[https://img.shields.io/badge/XAMPP-FB7A24?style=for-the-badge&logo=xampp&logoColor=white](https://img.shields.io/badge/XAMPP-FB7A24?style=for-the-badge&logo=xampp&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![XAMPP](https://img.shields.io/badge/XAMPP-FB7A24?style=for-the-badge&logo=xampp&logoColor=white)
 
 ## ✨ Features
 
@@ -79,13 +79,13 @@ USE pos_db;
 2.  Extract to: `C:\xampp\htdocs\pos\` (Windows) or `/opt/lampp/htdocs/pos/` (Linux)
 3.  Folder structure should be:
 
-pos/
+<pre> ```text pos/
 ├── index.php
 ├── dashboard.php
 ├── cashier/
 ├── admin/
 ├── actions/
-└── includes/
+└── includes/ ``` </pre>
 
 ### Step 4: Configure Database
 
