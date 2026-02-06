@@ -68,8 +68,10 @@ A complete, beginner-friendly Point of Sale system built with plain PHP, MySQL, 
 2.  Import the SQL schema:
 
 -- Run this in phpMyAdmin SQL tab
-`CREATE DATABASE pos_db;
-USE pos_db;
+
+    `CREATE DATABASE pos_db;
+    			USE pos_db;
+
 -- Tables will be created automatically on first run
 -- Or import the provided pos_db.sql file
 
@@ -78,64 +80,64 @@ USE pos_db;
 1.  Download/clone the POS files
 2.  Extract to: `C:\xampp\htdocs\pos\` (Windows) or `/opt/lampp/htdocs/pos/` (Linux)
 3.  Folder structure should be:
-
-<pre> ```text pos/
-├── index.php
-├── dashboard.php
-├── cashier/
-├── admin/
-├── actions/
-└── includes/ ``` </pre>
+    - pos/
+      - index.php
+      - dashboard.php
+      - cashier/
+      - admin/
+      - actions/
+      - includes/
 
 ### Step 4: Configure Database
 
 Edit `/includes/db.php`:
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'pos_db');
-define('DB_USER', 'root'); // Default XAMPP username
-define('DB_PASS', ''); // Default XAMPP password (empty)
+    define('DB_HOST', 'localhost');
+    define('DB_NAME', 'pos_db');
+    define('DB_USER', 'root');      // Default XAMPP username
+    define('DB_PASS', '');          // Default XAMPP password (empty)
 
 ### Step 5: Set Up Users
 
 Run this SQL in phpMyAdmin:
 
 -- Insert default users (passwords will be hashed)
-INSERT INTO users (username, password, role) VALUES
-('admin', '$2y$10$YourHashedPasswordHere', 'admin'),
-('cashier', '$2y$10$YourHashedPasswordHere', 'cashier');
+
+    INSERT INTO users (username, password, role) VALUES
+    ('admin', '$2y$10$YourHashedPasswordHere', 'admin'),
+    ('cashier', '$2y$10$YourHashedPasswordHere', 'cashier');
 
 To generate password hashes, create a temporary file:
 
-<?php
-echo password_hash('admin123', PASSWORD_DEFAULT);
-echo password_hash('cashier123', PASSWORD_DEFAULT);
-?>
+    <?php
+    echo password_hash('admin123', PASSWORD_DEFAULT);
+    echo password_hash('cashier123', PASSWORD_DEFAULT);
+    ?>
 
 ## 📁 File Structure
 
-pos/
-├── index.php # Login page
-├── dashboard.php # Main dashboard
-├── cashier/
-│ └── pos.php # POS interface
-├── admin/
-│ ├── products.php # Product management
-│ └── reports.php # Sales reports
-├── actions/
-│ ├── checkout.php # Process sales
-│ ├── receipt.php # Generate receipts
-│ ├── add_to_cart.php # Cart operations
-│ ├── update_cart.php
-│ ├── remove_from_cart.php
-│ ├── get_cart.php
-│ ├── clear_cart.php
-│ └── logout.php
-├── includes/
-│ ├── db.php # Database connection
-│ ├── auth.php # Authentication functions
-│ └── config.php # Configuration (optional)
-└── assets/ # CSS, JS, images
+    pos/
+      - index.php                  # Login page
+      - dashboard.php              # Main dashboard
+      - cashier/
+    - pos.php                  # POS interface
+      - admin/
+    - products.php             # Product management
+    - reports.php              # Sales reports
+      - actions/
+    - checkout.php             # Process sales
+    - receipt.php              # Generate receipts
+    - add_to_cart.php          # Cart operations
+    - update_cart.php
+    - remove_from_cart.php
+    - get_cart.php
+    - clear_cart.php
+    - logout.php
+      - includes/
+    - db.php                   # Database connection
+    - auth.php                 # Authentication functions
+    - config.php               # Configuration (optional)
+      - assets/                     # CSS, JS, images
 
 ## 👥 User Roles & Credentials
 
@@ -201,11 +203,11 @@ Orientation: Portrait
 
 Edit `/actions/receipt.php`:
 
-    / Store information
-    Store Name: 'Your Store Name'
-    Address: 'Your Address'
-    Phone: 'Your Phone Number'
-    VAT Number: 'Your TIN'
+      **Store information**
+        Store Name: 'Your Store Name'
+        Address: 'Your Address'
+        Phone: 'Your Phone Number'
+        VAT Number: 'Your TIN'
 
 ### Change Currency
 
