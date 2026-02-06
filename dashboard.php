@@ -156,15 +156,78 @@ require_login();
         
         <div class="cards">
             <?php if ($_SESSION['user_role'] === 'cashier'): ?>
+                <!-- Cashier Dashboard -->
                 <div class="card cashier-only">
                     <div class="card-icon">💰</div>
-                    <div class="card-title">POS Interface</div>
-                    <p>Start selling products</p>
-                    <a href="cashier/pos.php" class="card-link">Open POS</a>
+                    <div class="card-title">Point of Sale System</div>
+                    <p>Start selling products, manage cart, process checkout</p>
+                    <a href="cashier/pos.php" class="card-link">Launch POS</a>
                 </div>
-            <?php endif; ?>
-            
-            <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                
+                <!-- Today's Stats Card -->
+                <div class="card" style="background: #f0f9ff; border-left: 4px solid #0ea5e9;">
+                    <div class="card-icon">📈</div>
+                    <div class="card-title">Today's Performance</div>
+                    
+                    <?php
+                    // Get today's sales stats for this cashier
+                    $stmt = $pdo->prepare("
+                        SELECT 
+                            COUNT(*) as transactions,
+                            COALESCE(SUM(total_amount), 0) as total_sales
+                        FROM sales 
+                        WHERE DATE(sale_date) = CURDATE() 
+                        AND cashier_id = ?
+                    ");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    $stats = $stmt->fetch();
+                    
+                    // Get first sale time
+                    $stmt = $pdo->prepare("
+                        SELECT DATE_FORMAT(MIN(sale_date), '%h:%i %p') as first_sale
+                        FROM sales 
+                        WHERE DATE(sale_date) = CURDATE() 
+                        AND cashier_id = ?
+                    ");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    $first_sale = $stmt->fetch();
+                    ?>
+                    
+                    <div style="text-align: left; margin-top: 15px; font-size: 14px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #666;">Total Sales:</span>
+                            <span style="font-weight: bold; color: #059669;"><?php echo CURRENCY_SYMBOL . number_format($stats['total_sales'], 2); ?></span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #666;">Transactions:</span>
+                            <span style="font-weight: bold; color: #3b82f6;"><?php echo $stats['transactions']; ?></span>
+                        </div>
+                        
+                        <?php if ($first_sale['first_sale']): ?>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #666;">First Sale:</span>
+                            <span style="color: #6b7280;"><?php echo $first_sale['first_sale']; ?></span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #666;">Date:</span>
+                            <span style="color: #6b7280;"><?php echo date('d M Y'); ?></span>
+                        </div>
+                    </div>
+                    
+                    <?php if ($stats['transactions'] > 0): ?>
+                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd;">
+                        <a href="cashier/today_sales.php" style="color: #0ea5e9; text-decoration: none; font-size: 13px;">
+                            View detailed report →
+                        </a>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                
+            <?php elseif ($_SESSION['user_role'] === 'admin'): ?>
+                <!-- Admin View -->
                 <div class="card admin-only">
                     <div class="card-icon">📦</div>
                     <div class="card-title">Product Management</div>

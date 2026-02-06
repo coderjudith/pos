@@ -307,7 +307,7 @@ $summary = $stmt->fetch();
         <!-- Summary Cards -->
         <div class="summary-cards">
             <div class="summary-card">
-                <div class="value">₹<?php echo number_format($summary['total_sales'] ?? 0, 2); ?></div>
+                <div class="value"><?php echo CURRENCY_SYMBOL . number_format($summary['total_sales'] ?? 0, 2); ?></div>
                 <div class="label">Total Sales</div>
             </div>
             
@@ -352,7 +352,7 @@ $summary = $stmt->fetch();
                                 <tr>
                                     <td><?php echo date('d M Y', strtotime($row['sale_day'])); ?></td>
                                     <td class="text-right"><?php echo $row['transactions']; ?></td>
-                                    <td class="text-right">₹<?php echo number_format($row['total_sales'], 2); ?></td>
+                                    <td class="text-right"><?php echo CURRENCY_SYMBOL . number_format($row['total_sales'], 2); ?></td>
                                     <td class="text-right">₹<?php echo number_format($row['total_cash'], 2); ?></td>
                                     <td class="text-right">₹<?php echo number_format($row['total_change'], 2); ?></td>
                                 </tr>
@@ -392,7 +392,7 @@ $summary = $stmt->fetch();
                                         <span class="product-badge"><?php echo $product['barcode']; ?></span>
                                     </td>
                                     <td class="text-right"><?php echo $product['total_qty']; ?></td>
-                                    <td class="text-right">₹<?php echo number_format($product['total_amount'], 2); ?></td>
+                                    <td class="text-right"><?php echo CURRENCY_SYMBOL . number_format($product['total_amount'], 2); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>

@@ -186,9 +186,9 @@ $items = $stmt->fetchAll();
 <body onload="window.print()">
     <div class="receipt">
         <div class="header">
-            <div class="store-name">POS STORE</div>
-            <div class="address">123 Main Street, City</div>
-            <div class="address">Phone: (123) 456-7890</div>
+            <div class="store-name"><?php echo STORE_NAME; ?></div>
+<div class="address"><?php echo STORE_ADDRESS; ?></div>
+<div class="address">Phone: <?php echo STORE_PHONE; ?></div>
         </div>
         
         <div class="receipt-info">
@@ -220,8 +220,9 @@ $items = $stmt->fetchAll();
                     <tr>
                         <td><?php echo htmlspecialchars($item['name']); ?></td>
                         <td><?php echo $item['qty']; ?></td>
-                        <td>₹<?php echo number_format($item['price'], 2); ?></td>
-                        <td>₹<?php echo number_format($item['subtotal'], 2); ?></td>
+                        <td><?php echo CURRENCY_SYMBOL . number_format($item['price'], 2); ?></td>
+                        
+                        <td><?php echo CURRENCY_SYMBOL . number_format($item['subtotal'], 2); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -230,33 +231,42 @@ $items = $stmt->fetchAll();
         <div class="total-section">
             <div class="total-row">
                 <span>Subtotal:</span>
-                <span>₹<?php echo number_format($sale['total_amount'], 2); ?></span>
+                <span><?php echo CURRENCY_SYMBOL . number_format($sale['total_amount'], 2); ?></span>
             </div>
             <div class="total-row">
                 <span>Tax:</span>
-                <span>₹0.00</span>
+                <span>₱0.00</span>
             </div>
             <div class="total-row">
                 <span>Cash:</span>
-                <span>₹<?php echo number_format($sale['cash'], 2); ?></span>
+                <span><?php echo CURRENCY_SYMBOL . number_format($sale['cash'], 2); ?></span>
             </div>
             <div class="total-row grand">
                 <span>Change:</span>
-                <span>₹<?php echo number_format($sale['change_amount'], 2); ?></span>
+                <span><?php echo CURRENCY_SYMBOL . number_format($sale['change_amount'], 2); ?></span>
             </div>
         </div>
         
         <div class="footer">
-            <div>Thank you for your purchase!</div>
-            <div>Please keep this receipt for returns</div>
-            <div>VAT No: 123456789</div>
-        </div>
+    <div><?php echo RECEIPT_HEADER; ?></div>
+    <div><?php echo RECEIPT_FOOTER; ?></div>
+    <div><?php echo STORE_VAT; ?></div>
+</div>
     </div>
     
     <div class="no-print">
-        <button onclick="window.print()" class="print-btn">Print Receipt</button>
-        <a href="../cashier/pos.php" class="back-btn">Back to POS</a>
-        <a href="../dashboard.php" class="back-btn" style="background: #6b7280;">Dashboard</a>
+    <button onclick="window.print()" class="print-btn">Print Receipt</button>
+    
+    <div style="display: flex; gap: 10px; margin: 10px 0;">
+        <a href="../cashier/pos.php" class="back-btn" style="background: #8b5cf6; flex: 1;">
+            🆕 Start New Sale
+        </a>
+        <a href="../cashier/pos.php" class="back-btn" style="background: #667eea; flex: 1;">
+            ↩️ Back to POS
+        </a>
     </div>
+    
+    <a href="../dashboard.php" class="back-btn" style="background: #6b7280;">Dashboard</a>
+</div>
 </body>
 </html>

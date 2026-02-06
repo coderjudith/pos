@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS System - Login</title>
+    <title><?php echo STORE_NAME; ?> - Login</title>
     <style>
         * {
             margin: 0;
@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="login-container">
-        <h1>POS System</h1>
+        <h1><?php echo STORE_NAME; ?></h1>
         <p class="subtitle">Point of Sale System v1.0</p>
         
         <?php if ($error): ?>

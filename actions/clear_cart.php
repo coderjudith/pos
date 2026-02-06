@@ -1,9 +1,11 @@
 <?php
-session_start();
+// clear_cart.php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 header('Content-Type: application/json');
 
-// Clear the cart from session
 if (isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }

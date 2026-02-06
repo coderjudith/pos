@@ -352,7 +352,7 @@ foreach ($products as $product) {
                          onclick="addToCart('<?php echo $product['barcode']; ?>')"
                          data-barcode="<?php echo $product['barcode']; ?>">
                         <div class="product-name"><?php echo htmlspecialchars($product['name']); ?></div>
-                        <div class="product-price">₹<?php echo number_format($product['price'], 2); ?></div>
+                        <div class="product-price"><?php echo CURRENCY_SYMBOL; ?><?php echo number_format($product['price'], 2); ?></div>
                         <div class="product-stock">Stock: <?php echo $product['stock_qty']; ?></div>
                     </div>
                 <?php endforeach; ?>
@@ -369,15 +369,15 @@ foreach ($products as $product) {
     <div class="cart-totals">
         <div class="total-row">
             <span>Subtotal:</span>
-            <span id="subtotal">₹0.00</span>
+            <span id="subtotal"><?php echo CURRENCY_SYMBOL; ?>0.00</span>
         </div>
         <div class="total-row">
             <span>Tax (0%):</span>
-            <span id="tax">₹0.00</span>
+            <span id="tax"><?php echo CURRENCY_SYMBOL; ?>0.00</span>
         </div>
         <div class="total-row grand-total">
             <span>Total:</span>
-            <span id="total">₹0.00</span>
+            <span id="total"><?php echo CURRENCY_SYMBOL; ?>0.00</span>
         </div>
     </div>
     
@@ -389,7 +389,7 @@ foreach ($products as $product) {
            step="0.01">
     
     <div class="change-display" id="changeDisplay">
-        Change: ₹0.00
+        Change: <?php echo CURRENCY_SYMBOL; ?>0.00
     </div>
     
     <!-- NEW SALE BUTTON -->
@@ -439,14 +439,14 @@ foreach ($products as $product) {
                 <div class="cart-item">
                     <div class="item-info">
                         <div class="item-name">${item.name}</div>
-                        <div class="item-price">₹${parseFloat(item.price).toFixed(2)} each</div>
+                        <div class="item-price"><?php echo CURRENCY_SYMBOL; ?>${parseFloat(item.price).toFixed(2)} each</div>
                     </div>
                     <div class="item-qty">
                         <button class="qty-btn" onclick="updateQty('${barcode}', ${item.qty - 1})">-</button>
                         <span class="qty-display">${item.qty}</span>
                         <button class="qty-btn" onclick="updateQty('${barcode}', ${item.qty + 1})">+</button>
                     </div>
-                    <div class="item-total">₹${parseFloat(item.subtotal).toFixed(2)}</div>
+                    <div class="item-total"><?php echo CURRENCY_SYMBOL; ?>${parseFloat(item.subtotal).toFixed(2)}</div>
                     <button class="qty-btn remove" onclick="removeFromCart('${barcode}')">×</button>
                 </div>
             `;
@@ -463,9 +463,9 @@ foreach ($products as $product) {
         const tax = 0;
         const total = subtotal + tax;
         
-        document.getElementById('subtotal').textContent = '₹' + subtotal.toFixed(2);
-        document.getElementById('tax').textContent = '₹' + tax.toFixed(2);
-        document.getElementById('total').textContent = '₹' + total.toFixed(2);
+        document.getElementById('subtotal').textContent = '<?php echo CURRENCY_SYMBOL; ?>' + subtotal.toFixed(2);
+        document.getElementById('tax').textContent = '<?php echo CURRENCY_SYMBOL; ?>' + tax.toFixed(2);
+        document.getElementById('total').textContent = '<?php echo CURRENCY_SYMBOL; ?>' + total.toFixed(2);
         
         calculateChange(total);
         
@@ -479,10 +479,10 @@ foreach ($products as $product) {
         
         const changeDisplay = document.getElementById('changeDisplay');
         if (change >= 0) {
-            changeDisplay.textContent = 'Change: ₹' + change.toFixed(2);
+            changeDisplay.textContent = 'Change: <?php echo CURRENCY_SYMBOL; ?>' + change.toFixed(2);
             changeDisplay.style.color = '#10b981';
         } else {
-            changeDisplay.textContent = 'Insufficient: ₹' + Math.abs(change).toFixed(2);
+            changeDisplay.textContent = 'Insufficient: <?php echo CURRENCY_SYMBOL; ?>' + Math.abs(change).toFixed(2);
             changeDisplay.style.color = '#ef4444';
         }
     }
@@ -548,7 +548,7 @@ foreach ($products as $product) {
     
     function checkout() {
         const cash = parseFloat(document.getElementById('cashInput').value) || 0;
-        const total = parseFloat(document.getElementById('total').textContent.replace('₹', '')) || 0;
+        const total = parseFloat(document.getElementById('total').textContent.replace('<?php echo CURRENCY_SYMBOL; ?>', '')) || 0;
         const checkoutBtn = document.getElementById('checkoutBtn');
         
         if (total === 0) {
@@ -563,7 +563,7 @@ foreach ($products as $product) {
         }
         
         const change = cash - total;
-        if (confirm(`CONFIRM CHECKOUT?\n\nTotal: ₹${total.toFixed(2)}\nCash: ₹${cash.toFixed(2)}\nChange: ₹${change.toFixed(2)}`)) {
+        if (confirm(`CONFIRM CHECKOUT?\n\nTotal: <?php echo CURRENCY_SYMBOL; ?>${total.toFixed(2)}\nCash: <?php echo CURRENCY_SYMBOL; ?>${cash.toFixed(2)}\nChange: <?php echo CURRENCY_SYMBOL; ?>${change.toFixed(2)}`)) {
             // Show loading state
             checkoutBtn.disabled = true;
             checkoutBtn.innerHTML = '⏳ PROCESSING...';
@@ -584,7 +584,7 @@ foreach ($products as $product) {
             .then(data => {
                 if (data.success) {
                     // SUCCESS
-                    alert(`✅ SALE COMPLETED!\n\nReceipt #: ${data.sale_id}\nTotal: ₹${total.toFixed(2)}`);
+                    alert(`✅ SALE COMPLETED!\n\nReceipt #: ${data.sale_id}\nTotal: <?php echo CURRENCY_SYMBOL; ?>${total.toFixed(2)}`);
                     
                     // Show NEW SALE button
                     document.getElementById('newSaleBtn').style.display = 'block';
@@ -599,7 +599,7 @@ foreach ($products as $product) {
                     
                     // Reset form
                     document.getElementById('cashInput').value = '';
-                    document.getElementById('changeDisplay').textContent = 'Change: ₹0.00';
+                    document.getElementById('changeDisplay').textContent = 'Change: <?php echo CURRENCY_SYMBOL; ?>0.00';
                     document.getElementById('changeDisplay').style.color = '#10b981';
                     
                     // Reset checkout button
@@ -679,7 +679,7 @@ foreach ($products as $product) {
     });
     
     document.getElementById('cashInput').addEventListener('input', function() {
-        const total = parseFloat(document.getElementById('total').textContent.replace('₹', '')) || 0;
+        const total = parseFloat(document.getElementById('total').textContent.replace('<?php echo CURRENCY_SYMBOL; ?>', '')) || 0;
         calculateChange(total);
     });
     

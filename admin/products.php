@@ -351,7 +351,7 @@ if ($action === 'edit' && $id) {
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="price">Price (₹) *</label>
+                        <label for="price">Price (<?php echo CURRENCY_SYMBOL; ?>) *</label>
                         <input type="number" 
                                id="price" 
                                name="price" 
@@ -418,7 +418,7 @@ if ($action === 'edit' && $id) {
                                 <td><?php echo $product['id']; ?></td>
                                 <td><?php echo htmlspecialchars($product['barcode']); ?></td>
                                 <td><?php echo htmlspecialchars($product['name']); ?></td>
-                                <td>₹<?php echo number_format($product['price'], 2); ?></td>
+                                <td><?php echo CURRENCY_SYMBOL . number_format($product['price'], 2); ?></td>
                                 <td class="<?php echo $product['stock_qty'] < 10 ? 'stock-low' : ''; ?>">
                                     <?php echo $product['stock_qty']; ?>
                                 </td>

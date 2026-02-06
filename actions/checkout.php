@@ -1,70 +1,140 @@
 <?php
-// Turn off ALL error display for production
+// COMPLETE checkout.php with database support
+
+// Turn off error display
 error_reporting(0);
 ini_set('display_errors', 0);
 
-// Start session only if not already started
+// Start session if not started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Set JSON header FIRST
+// Set JSON header
 header('Content-Type: application/json');
 
-// For debugging - uncomment these lines to see errors:
-// error_reporting(E_ALL);
-// ini_set('display_errors', 1);
+// Include database
+require_once '../includes/db.php';
 
-// If it's a GET request (for testing), return a test response
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'Not logged in']);
+    exit();
+}
+
+// Handle GET requests (for testing)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo json_encode([
         'success' => true,
-        'sale_id' => 'TEST-' . time(),
-        'message' => 'GET request received (for testing)',
-        'note' => 'For actual checkout, use POST method'
+        'message' => 'Checkout API is working. Use POST for checkout.',
+        'session_user' => $_SESSION['username'] ?? 'Unknown'
     ]);
     exit();
 }
 
-// Only accept POST requests for real checkout
+// Handle POST requests (real checkout)
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405); // Method Not Allowed
-    echo json_encode([
-        'success' => false, 
-        'message' => 'Invalid request method. Use POST instead of ' . $_SERVER['REQUEST_METHOD']
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
     exit();
 }
 
-// Get the POST data
+// Get POST data
 $input = json_decode(file_get_contents('php://input'), true);
-
-// Check if we got valid JSON
-if (json_last_error() !== JSON_ERROR_NONE) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid JSON data: ' . json_last_error_msg(),
-        'raw_input' => file_get_contents('php://input')
-    ]);
-    exit();
-}
-
-// Get cash amount
 $cash = floatval($input['cash'] ?? 0);
 
-// For now, always return success (we'll add real logic later)
-$sale_id = 'SALE-' . date('Ymd-His') . '-' . rand(100, 999);
+// Validate cart
+if (empty($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
+    echo json_encode(['success' => false, 'message' => 'Cart is empty']);
+    exit();
+}
 
-echo json_encode([
-    'success' => true,
-    'sale_id' => $sale_id,
-    'message' => 'Checkout successful!',
-    'cash_received' => $cash,
-    'total' => 50.00, // Hardcoded for testing
-    'change' => $cash - 50.00,
-    'test_mode' => true,
-    'note' => 'Database not updated in test mode'
-]);
+// Calculate total
+$total = 0;
+foreach ($_SESSION['cart'] as $item) {
+    if (isset($item['subtotal'])) {
+        $total += floatval($item['subtotal']);
+    }
+}
 
-exit();
+// Validate cash
+if ($cash < $total) {
+    echo json_encode(['success' => false, 'message' => 'Insufficient cash']);
+    exit();
+}
+
+$change = $cash - $total;
+
+try {
+    // Start transaction
+    $pdo->beginTransaction();
+    
+    // 1. Insert sale record
+    $stmt = $pdo->prepare("
+        INSERT INTO sales (cashier_id, total_amount, cash, change_amount, sale_date) 
+        VALUES (?, ?, ?, ?, NOW())
+    ");
+    
+    $stmt->execute([
+        $_SESSION['user_id'],
+        $total,
+        $cash,
+        $change
+    ]);
+    
+    $sale_id = $pdo->lastInsertId();
+    
+    // 2. Insert sale items and update stock
+    foreach ($_SESSION['cart'] as $barcode => $item) {
+        // Insert sale item
+        $stmt = $pdo->prepare("
+            INSERT INTO sale_items (sale_id, product_id, price, qty, subtotal)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        
+        $stmt->execute([
+            $sale_id,
+            $item['product_id'],
+            $item['price'],
+            $item['qty'],
+            $item['subtotal']
+        ]);
+        
+        // Update product stock
+        $stmt = $pdo->prepare("
+            UPDATE products 
+            SET stock_qty = stock_qty - ? 
+            WHERE id = ?
+        ");
+        
+        $stmt->execute([$item['qty'], $item['product_id']]);
+    }
+    
+    // Commit transaction
+    $pdo->commit();
+    
+    // Save sale_id to session for receipt
+    $_SESSION['last_sale_id'] = $sale_id;
+    
+    // Clear cart
+    $_SESSION['cart'] = [];
+    
+    // Return success
+    echo json_encode([
+        'success' => true,
+        'sale_id' => $sale_id,
+        'message' => 'Checkout successful!',
+        'total' => $total,
+        'cash' => $cash,
+        'change' => $change
+    ]);
+    
+} catch (Exception $e) {
+    // Rollback on error
+    $pdo->rollBack();
+    
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Database error: ' . $e->getMessage()
+    ]);
+}
 ?>

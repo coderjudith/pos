@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config.php';
 // Database configuration
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'pos_db');
